@@ -1,75 +1,39 @@
 # Tun2SocksKit
 
+Fork of [EbrahimTahernejad/Tun2SocksKit](https://github.com/EbrahimTahernejad/Tun2SocksKit)
+(originally by [arror](https://github.com/arror/)) — a Swift wrapper and build
+workflow for [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel).
 
-This repository is a wrapper and a build workflow for [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel)
+The Swift API, product names (`Tun2SocksKit`, `Tun2SocksKitC`), the binary
+target (`HevSocks5Tunnel`), the C header and the xcframework layout are kept
+identical to upstream, so it is a drop-in replacement. Differences:
 
-## Original Developer ([arror](https://github.com/arror/))
-This code originally belonged to [arror](https://github.com/arror/). I'm just maintaining and updating it.
+- built from newer hev-socks5-tunnel releases (versions follow upstream's
+  scheme: `5.x.y` ↔ hev `2.x.y`);
+- `ENABLE_STACK_OVERFLOW_DETECTOR=0`: since 2.17 hev installs process-wide
+  SIGSEGV/SIGBUS handlers, which conflict with a Go runtime (e.g. Xray) living
+  in the same process;
+- the iOS simulator stub is vendored in `stub/` instead of a separate repo;
+- no CocoaPods.
 
-If you appreciate this repo, give him a thanks.
+## Release
+
+Actions → Release → Run workflow with `version` (e.g. `5.18.0`) and `tag`
+(hev-socks5-tunnel tag, e.g. `2.18.0`). The workflow builds the xcframework,
+commits `Package.swift` with the new URL/checksum, tags it and publishes the
+release.
+
+Local build: `scripts/build.sh 2.18.0`.
 
 ## Usage
-You only need to import `Tun2SocksKit`
+
 ```swift
 import Tun2SocksKit
-```
 
-### Running Tun2SocksKit
-
-Use a file URL to run it
-```swift
 let code = Socks5Tunnel.run(withConfig: .file(path: localConfigFileURL))
-```
-
-Or the contents of the config file as a string
-```swift
 let code = Socks5Tunnel.run(withConfig: .string(content: stringConfigContent))
+Socks5Tunnel.run(withConfig: .string(content: stringConfigContent)) { code in }
+
+let stats = Socks5Tunnel.stats   // stats.up/down.packets/bytes
+Socks5Tunnel.quit()
 ```
-
-You can run it non-blocking as well
-```swift
-Socks5Tunnel.run(withConfig: .string(content: stringConfigContent)) { code in
-    // Do stuff with code
-}
-```
-
-### Stats
-To get stats you need to call
-```swift
-let stats = Socks5Tunnel.stats
-```
-
-Both packet count and bytes transmitted/received are provided
-```swift
-print(stats.up.packets)
-print(stats.up.bytes)
-print(stats.down.packets)
-print(stats.down.bytes)
-```
-
-## Config
-```yml
-tunnel:
-  mtu: 9000
-
-socks5:
-  port: 7890
-  address: ::1
-  udp: 'udp'
-
-misc:
-  task-stack-size: 24576 # 20480 + 4096
-  tcp-buffer-size: 4096
-  max-session-count: 768
-  connect-timeout: 5000
-  read-write-timeout: 60000
-  log-file: stderr
-  log-level: error
-  limit-nofile: 65535
-```
-
-
-
-
-
-

@@ -1,0 +1,5 @@
+.build/
+.build-hev/
+.swiftpm/
+HevSocks5Tunnel.xcframework/
+HevSocks5Tunnel.xcframework.zip
